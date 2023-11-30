@@ -28,3 +28,7 @@ This package implements many of the Rust Option and Result monad features. Some 
 ~~~bash
 pip install somnon
 ~~~
+
+## Usage
+
+Examples in progress. In the time being read through the above rust-docs, they mostly cover everything anyway.
