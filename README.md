@@ -1,6 +1,11 @@
 
 # Python Option and Result
 
+- [Python Option and Result](#python-option-and-result)
+  - [Reference](#reference)
+  - [Installation](#installation)
+
+
 ~~~txt
  _______  _______  __   __  __    _  _______  __    _
 |       ||       ||  |_|  ||  |  | ||       ||  |  | |
