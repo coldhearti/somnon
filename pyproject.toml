@@ -7,3 +7,13 @@ requires-python = ">=3.11"
 license = { file = "LICENSE.rst" }
 readme = "README.md"
 urls = { "github" = "https://github.com/coldhearti/somnon" }
+[tool.poetry]
+name = "somnon"
+version = "0.1.2"
+description = "Rust-like Option and Result implementation"
+license = "LICENSE.rst"
+authors = ["Eemil Kiviahde <eemil.kiviahde@coldheart.dev>"]
+readme = "README.md"
+repository = "https://github.com/coldhearti/somnon"
+homepage = "https://coldheart.dev"
+documentation = "https://github.com/coldhearti/somnon#readme"

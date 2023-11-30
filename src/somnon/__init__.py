@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Generic, Tuple, Type, TypeVar
+from typing import Callable, Generic, Tuple, Type, TypeVar, cast
 
 """
 * Option and Result monad implementation,
@@ -21,8 +21,8 @@ class TransposeException(Exception):
 
 
 class __Maybe(Generic[T]):
-    def __init__(self, ok: Type[_Ok[T | U]], nok: Type[_NoOk[T | U]]) -> None:
-        self._value: T
+    def __init__(self, value, ok: Type[_Ok[T | U]], nok: Type[_NoOk[T | U]]) -> None:
+        self._value: T = value
         self._ok = ok
         self._nok = nok
 
@@ -82,19 +82,17 @@ class __Maybe(Generic[T]):
 
 class _Ok(Generic[T], __Maybe[T]):
     def __init__(self, value: T, ok: type[_Ok[T]], nok: type[_NoOk[T]]) -> None:
-        super().__init__(ok, nok)
-        self._value = value
+        super().__init__(value, ok, nok)
 
 
 class _NoOk(Generic[T], __Maybe[T]):
     def __init__(self, ok: type[_Ok[T]], nok: type[_NoOk[T]]) -> None:
-        super().__init__(ok, nok)
+        super().__init__(cast(T, None), ok, nok)
 
 
 class Result(Generic[T], __Maybe[T]):
     def __init__(self, value: T) -> None:
-        super().__init__(Ok, Err)
-        self._value = value
+        super().__init__(value, Ok, Err)
 
     def is_ok(self):
         return isinstance(self, Ok)
@@ -106,19 +104,18 @@ class Result(Generic[T], __Maybe[T]):
 class Ok(Result[T], _Ok[T]):
     def __init__(self, value: T) -> None:
         super(Result, self).__init__(value, Ok, Err)
-        super(_Ok, self).__init__(Ok, Err)
+        super(_Ok, self).__init__(value, Ok, Err)
 
 
 class Err(Result[T], _NoOk[T]):
     def __init__(self, err: T) -> None:
         super(Result, self).__init__(Ok, Err)
-        super(_NoOk, self).__init__(Ok, Err)
-        self._value = err
+        super(_NoOk, self).__init__(err, Ok, Err)
 
 
 class Option(Generic[T], __Maybe[T]):
     def __init__(self) -> None:
-        super().__init__(Som, Non)
+        super().__init__(cast(T, None), Som, Non)
 
     def is_som(self) -> bool:
         return isinstance(self, Som)
@@ -248,11 +245,10 @@ class Option(Generic[T], __Maybe[T]):
 class Som(Option[T], _Ok[T]):
     def __init__(self, value: T) -> None:
         super(Option, self).__init__(value, Som, Non)
-        super(_Ok, self).__init__(Som, Non)
-        self._value = value
+        super(_Ok, self).__init__(value, Som, Non)
 
 
 class Non(Option[T], _NoOk[T]):
     def __init__(self) -> None:
         super(Option, self).__init__(Som, Non)
-        super(_NoOk, self).__init__(Som, Non)
+        super(_NoOk, self).__init__(cast(T, None), Som, Non)
