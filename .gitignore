@@ -3,3 +3,6 @@ src/somnon.egg-info/PKG-INFO
 dist
 __pycache__
 */__pycache__
+src/somnon.egg-info/top_level.txt
+src/somnon.egg-info/SOURCES.txt
+src/somnon.egg-info/dependency_links.txt
