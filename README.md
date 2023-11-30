@@ -4,6 +4,7 @@
 - [Python Option and Result](#python-option-and-result)
   - [Reference](#reference)
   - [Installation](#installation)
+  - [Usage](#usage)
 
 
 ~~~txt
