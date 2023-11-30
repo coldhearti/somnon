@@ -121,7 +121,7 @@ class Ok(Result[T], _Ok[T]):
 
 
 class Err(Result[T], _NoOk[T]):
-    def __init__(self, err: T) -> None:
+    def __init__(self, err: T = "") -> None:
         super(Result, self).__init__(Ok, Err)
         super(_NoOk, self).__init__(err, Ok, Err)
 
