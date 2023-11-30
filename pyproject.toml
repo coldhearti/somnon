@@ -6,3 +6,4 @@ version = "0.1.0"
 requires-python = ">=3.11"
 license = { file = "LICENSE.rst" }
 readme = "README.md"
+urls = { "github" = "https://github.com/coldhearti/somnon" }
