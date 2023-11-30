@@ -9,7 +9,7 @@ readme = "README.md"
 urls = { "github" = "https://github.com/coldhearti/somnon" }
 [tool.poetry]
 name = "somnon"
-version = "0.1.2"
+version = "0.1.3"
 description = "Rust-like Option and Result implementation"
 license = "LICENSE.rst"
 authors = ["Eemil Kiviahde <eemil.kiviahde@coldheart.dev>"]

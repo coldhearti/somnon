@@ -29,6 +29,25 @@ class __Maybe(Generic[T]):
     def __repr__(self) -> str:
         return str(self._value)
 
+    def __hash__(self) -> int:
+        return hash(self._value)
+
+    def __format__(self, __format_spec: str) -> str:
+        return str(self._value)
+
+    def __str__(self) -> str:
+        return str(self._value)
+
+    def __eq__(self, __value: object) -> bool:
+        match type(self):
+            case self._ok:
+                if isinstance(__value, self._ok):
+                    return __value._value == self._value
+            case self._nok:
+                if isinstance(__value, self._nok):
+                    return True
+        return False
+
     def expect(self, panic_msg) -> T:
         try:
             return self.unwrap()
@@ -42,18 +61,12 @@ class __Maybe(Generic[T]):
         return self._value
 
     def unwrap_or(self, default: U) -> T | U:
-        try:
-            return self.unwrap()
-
-        except UnwrapException:
+        if self._value is None:
             return default
+        return self._value
 
     def unwrap_or_else(self, else_func: Callable[[], T]) -> T:
-        try:
-            return self.unwrap()
-
-        except UnwrapException:
-            return else_func()
+        return self.unwrap_or(else_func())
 
     def map(self, func: Callable[[T], U]) -> __Maybe[U] | __Maybe[T]:
         match self:
@@ -67,7 +80,7 @@ class __Maybe(Generic[T]):
         match self:
             case self._ok():
                 return func(self._value)
-            case self._nok():
+            case self._nok:
                 ...
         return default
 
@@ -80,17 +93,17 @@ class __Maybe(Generic[T]):
         return default()
 
 
-class _Ok(Generic[T], __Maybe[T]):
+class _Ok(__Maybe[T]):
     def __init__(self, value: T, ok: type[_Ok[T]], nok: type[_NoOk[T]]) -> None:
         super().__init__(value, ok, nok)
 
 
-class _NoOk(Generic[T], __Maybe[T]):
+class _NoOk(__Maybe[T]):
     def __init__(self, ok: type[_Ok[T]], nok: type[_NoOk[T]]) -> None:
         super().__init__(cast(T, None), ok, nok)
 
 
-class Result(Generic[T], __Maybe[T]):
+class Result(__Maybe[T]):
     def __init__(self, value: T) -> None:
         super().__init__(value, Ok, Err)
 
@@ -113,7 +126,7 @@ class Err(Result[T], _NoOk[T]):
         super(_NoOk, self).__init__(err, Ok, Err)
 
 
-class Option(Generic[T], __Maybe[T]):
+class Option(__Maybe[T]):
     def __init__(self) -> None:
         super().__init__(cast(T, None), Som, Non)
 
