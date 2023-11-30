@@ -1,0 +1,8 @@
+LICENSE.rst
+README.md
+pyproject.toml
+src/somnon/__init__.py
+src/somnon.egg-info/PKG-INFO
+src/somnon.egg-info/SOURCES.txt
+src/somnon.egg-info/dependency_links.txt
+src/somnon.egg-info/top_level.txt
