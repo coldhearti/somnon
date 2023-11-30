@@ -22,7 +22,7 @@ Influence from Rust std::option and std::result
 
 ## Reference
 
-This package implements many of the Rust Option and Result features. Some names have been altered slightly to prevent clashes with reserved keywords and clashes with builtins.
+This package implements many of the Rust Option and Result monad features. Some names have been altered slightly to prevent clashes with reserved keywords and clashes with builtins.
 
 <https://doc.rust-lang.org/std/result/>
 
@@ -33,3 +33,7 @@ This package implements many of the Rust Option and Result features. Some names 
 ~~~bash
 pip install somnon
 ~~~
+
+## Usage
+
+Examples in progress. In the time being read through the above rust-docs, they mostly cover everything anyway.
