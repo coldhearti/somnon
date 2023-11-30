@@ -1,12 +1,6 @@
 
 # Python Option and Result
 
-- [Python Option and Result](#python-option-and-result)
-  - [Reference](#reference)
-  - [Installation](#installation)
-  - [Usage](#usage)
-
-
 ~~~txt
  _______  _______  __   __  __    _  _______  __    _
 |       ||       ||  |_|  ||  |  | ||       ||  |  | |
@@ -16,6 +10,11 @@
  _____| ||       || ||_|| || | |   ||       || | |   |
 |_______||_______||_|   |_||_|  |__||_______||_|  |__|
 ~~~
+
+- [Python Option and Result](#python-option-and-result)
+  - [Reference](#reference)
+  - [Installation](#installation)
+  - [Usage](#usage)
 
 Quick and dirty Rust like Option and Result implementation.
 
