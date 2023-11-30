@@ -1,4 +1,16 @@
+
+
 # Python Option and Result
+
+~~~
+ _______  _______  __   __  __    _  _______  __    _
+|       ||       ||  |_|  ||  |  | ||       ||  |  | |
+|  _____||   _   ||       ||   |_| ||   _||   |_| |
+| |_____ |  | |  ||       ||       ||  | |  ||       |
+|_____  ||  |_|  ||       ||_    ||  |_|  ||  _    |
+ _____| ||       || ||_|| || | |   ||       || | |   |
+|_______||_______||_|   |_||_|  |__||_______||_|  |__|
+~~~
 
 Quick and dirty Rust like Option and Result implementation.
 
@@ -16,3 +28,4 @@ This package implements many of the Rust Option and Result features. Some names 
 
 ~~~bash
 pip install somnon
+~~~
