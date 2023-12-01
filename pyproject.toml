@@ -2,11 +2,12 @@
 name = "somnon"
 description = "Rust-like Option and Result implementation"
 authors = [{ name = "Eemil Kiviahde", email = "eemil.kiviahde@coldheart.dev" }]
-version = "0.1.0"
+version = "0.1.4"
 requires-python = ">=3.11"
 license = { file = "LICENSE.rst" }
 readme = "README.md"
 urls = { "github" = "https://github.com/coldhearti/somnon" }
+
 [tool.poetry]
 name = "somnon"
 version = "0.1.3"

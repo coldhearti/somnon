@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Callable, Generic, Tuple, Type, TypeVar, cast
+from types import NoneType
+from typing import Any, Callable, Generic, Tuple, Type, TypeVar, cast
 
 """
 * Option and Result monad implementation,
@@ -20,23 +21,42 @@ class TransposeException(Exception):
     ...
 
 
-class __Maybe(Generic[T]):
-    def __init__(self, value, ok: Type[_Ok[T | U]], nok: Type[_NoOk[T | U]]) -> None:
-        self._value: T = value
+class ResultException(Exception):
+    ...
+
+
+class __Maybe(Generic[T, U]):
+    def __init__(self, value: T | U, ok: Type[_Ok[T]], nok: Type[_NoOk[U]]) -> None:
+        self._value = value
         self._ok = ok
         self._nok = nok
 
     def __repr__(self) -> str:
-        return str(self._value)
+        try:
+            return str(self.unwrap())
+        except UnwrapException:
+            return "None"
+        except Exception as e:
+            return e.__repr__()
 
     def __hash__(self) -> int:
         return hash(self._value)
 
     def __format__(self, __format_spec: str) -> str:
-        return str(self._value)
+        try:
+            return str(self.unwrap())
+        except UnwrapException:
+            return "None"
+        except Exception as e:
+            return e.__format__(__format_spec)
 
     def __str__(self) -> str:
-        return str(self._value)
+        try:
+            return str(self.unwrap())
+        except UnwrapException:
+            return "None"
+        except Exception as e:
+            return e.__str__()
 
     def __eq__(self, __value: object) -> bool:
         match type(self):
@@ -48,27 +68,35 @@ class __Maybe(Generic[T]):
                     return True
         return False
 
-    def expect(self, panic_msg) -> T:
+    def expect(self, panic_msg) -> T | U:
         try:
             return self.unwrap()
 
         except UnwrapException:
             raise UnwrapException(panic_msg)
 
-    def unwrap(self) -> T:
-        if self._value is None:
-            raise UnwrapException()
-        return self._value
+    def unwrap(self) -> T | U:
+        val = self._value
+        match self:
+            case self._nok():
+                match val:
+                    case None:
+                        raise UnwrapException()
+                return val
+            case self._ok():
+                ...
+        return val
 
-    def unwrap_or(self, default: U) -> T | U:
-        if self._value is None:
+    def unwrap_or(self, default: T | U) -> T | U:
+        try:
+            return self.unwrap()
+        except Exception:
             return default
-        return self._value
 
-    def unwrap_or_else(self, else_func: Callable[[], T]) -> T:
+    def unwrap_or_else(self, else_func: Callable[[], T | U]) -> T | U:
         return self.unwrap_or(else_func())
 
-    def map(self, func: Callable[[T], U]) -> __Maybe[U] | __Maybe[T]:
+    def map(self, func: Callable[[T], U]) -> __Maybe[T, U]:
         match self:
             case self._ok():
                 return self._ok(func(self._value), self._ok, self._nok)
@@ -93,17 +121,17 @@ class __Maybe(Generic[T]):
         return default()
 
 
-class _Ok(__Maybe[T]):
-    def __init__(self, value: T, ok: type[_Ok[T]], nok: type[_NoOk[T]]) -> None:
+class _Ok(__Maybe[T, NoneType]):
+    def __init__(self, value: T, ok: type[_Ok[T]], nok: type[_NoOk[NoneType]]) -> None:
         super().__init__(value, ok, nok)
 
 
-class _NoOk(__Maybe[T]):
-    def __init__(self, ok: type[_Ok[T]], nok: type[_NoOk[T]]) -> None:
-        super().__init__(cast(T, None), ok, nok)
+class _NoOk(__Maybe[NoneType, T]):
+    def __init__(self, value: T, ok: type[_Ok[NoneType]], nok: type[_NoOk[T]]) -> None:
+        super().__init__(value, ok, nok)
 
 
-class Result(__Maybe[T]):
+class Result(__Maybe[T, U]):
     def __init__(self, value: T) -> None:
         super().__init__(value, Ok, Err)
 
@@ -114,19 +142,19 @@ class Result(__Maybe[T]):
         return isinstance(self, Err)
 
 
-class Ok(Result[T], _Ok[T]):
+class Ok(Result[T, NoneType], _Ok[T]):
     def __init__(self, value: T) -> None:
         super(Result, self).__init__(value, Ok, Err)
         super(_Ok, self).__init__(value, Ok, Err)
 
 
-class Err(Result[T], _NoOk[T]):
+class Err(Result[NoneType, T], _NoOk[T]):
     def __init__(self, err: T = "") -> None:
-        super(Result, self).__init__(Ok, Err)
+        super(Result, self).__init__(err, Ok, Err)
         super(_NoOk, self).__init__(err, Ok, Err)
 
 
-class Option(__Maybe[T]):
+class Option(__Maybe[T, NoneType]):
     def __init__(self) -> None:
         super().__init__(cast(T, None), Som, Non)
 
@@ -136,17 +164,16 @@ class Option(__Maybe[T]):
     def is_non(self) -> bool:
         return isinstance(self, Non)
 
-    def ok_or(self, err: U) -> Result[T | U]:
+    def ok_or(self, err: U) -> Result[NoneType, U] | Result[T, NoneType]:
         try:
-            return Ok(self.unwrap())
-
+            return Ok(cast(T, self.unwrap()))
         except UnwrapException:
             return Err(err)
 
-    def ok_or_else(self, err_func: Callable[[], U]) -> Result[T | U]:
+    def ok_or_else(self, err_func: Callable[[], U]) -> Result[NoneType, U] | Result[T, NoneType]:
         return self.ok_or(err_func())
 
-    def transpose(self) -> Result[Som[T] | Non | T]:
+    def transpose(self) -> Result[T | Som | Non, NoneType] | Result[NoneType, Any]:
         match self:
             case Som():
                 match self._value:
@@ -159,10 +186,10 @@ class Option(__Maybe[T]):
                 return Ok(Non())
         raise TransposeException
 
-    def filter(self, pred: Callable[[T], bool]) -> Option[T]:
+    def filter(self, pred: Callable[[T], bool]) -> Option[T] | Option[NoneType]:
         match self:
             case Som():
-                if pred(self._value):
+                if pred(cast(T, self._value)):
                     return self
                 return Non()
             case Non():
@@ -174,31 +201,31 @@ class Option(__Maybe[T]):
             return self._value
         return self
 
-    def o_zip(self, optb: Option[U]) -> Option[Tuple[T, U]]:
+    def o_zip(self, optb: Option[U]) -> Option[Tuple[T, U]] | Option[NoneType]:
         match self:
             case Som():
                 match optb:
                     case Som():
-                        return Som((self._value, optb._value))
+                        return Som((cast(T, self._value), cast(U, optb._value)))
                     case Non():
                         ...
             case Non():
                 ...
         return Non()
 
-    def o_zip_with(self, optb: Option[U], func: Callable[[T, U], R]) -> Option[R]:
+    def o_zip_with(self, optb: Option[U], func: Callable[[T, U], R]) -> Option[R] | Option[NoneType]:
         match self:
             case Som():
                 match optb:
                     case Som():
-                        return Som(func(self._value, optb._value))
+                        return Som(func(cast(T, self._value), cast(U, optb._value)))
                     case Non():
                         ...
             case Non():
                 ...
         return Non()
 
-    def o_and(self, optb: Option[U]) -> Option[T] | Option[U]:
+    def o_and(self, optb: Option[U]) -> Option[T] | Option[U] | Option[NoneType]:
         match self:
             case Som():
                 match optb:
@@ -210,7 +237,7 @@ class Option(__Maybe[T]):
                 ...
         return Non()
 
-    def o_or(self, optb: Option[U]) -> Option[T] | Option[U]:
+    def o_or(self, optb: Option[U]) -> Option[T] | Option[U] | Option[NoneType]:
         match self:
             case Som():
                 return self
@@ -222,7 +249,7 @@ class Option(__Maybe[T]):
                         ...
         return Non()
 
-    def o_xor(self, optb: Option[U]) -> Option[T] | Option[U]:
+    def o_xor(self, optb: Option[U]) -> Option[T] | Option[U] | Option[NoneType]:
         match self:
             case Som():
                 match optb:
@@ -238,10 +265,10 @@ class Option(__Maybe[T]):
                         ...
         return Non()
 
-    def o_and_then(self, func: Callable[[T], Option[U]]) -> Option[T] | Option[U]:
+    def o_and_then(self, func: Callable[[T], Option[U]]) -> Option[T] | Option[U] | Option[NoneType]:
         match self:
             case Som():
-                return self.o_and(func(self._value))
+                return self.o_and(func(cast(T, self._value)))
             case Non():
                 ...
         return Non()
@@ -261,7 +288,7 @@ class Som(Option[T], _Ok[T]):
         super(_Ok, self).__init__(value, Som, Non)
 
 
-class Non(Option[T], _NoOk[T]):
+class Non(Option[NoneType], _NoOk[NoneType]):
     def __init__(self) -> None:
-        super(Option, self).__init__(Som, Non)
-        super(_NoOk, self).__init__(cast(T, None), Som, Non)
+        super(Option, self).__init__(None, Som, Non)
+        super(_NoOk, self).__init__(None, Som, Non)
