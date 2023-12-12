@@ -2,7 +2,7 @@
 name = "somnon"
 description = "Rust-like Option and Result implementation"
 authors = [{ name = "Eemil Kiviahde", email = "eemil.kiviahde@coldheart.dev" }]
-version = "0.1.4"
+version = "0.1.5"
 requires-python = ">=3.11"
 license = { file = "LICENSE.rst" }
 readme = "README.md"
